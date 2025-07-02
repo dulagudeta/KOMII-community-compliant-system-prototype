@@ -1,6 +1,4 @@
-Here's a README file you can copy and paste for your KOMII prototype:
 
-```markdown
 # KOMII - Community Issues Management System (Prototype)
 
 ## Overview
@@ -33,7 +31,6 @@ No installation required - this is a client-side only prototype that runs in the
    - **Admin**: Access all system data and reports
 
 ## File Structure
-```
 /komii-prototype/
 ├── index.html          # Landing page
 ├── auth.html           # Login/registration
@@ -43,7 +40,7 @@ No installation required - this is a client-side only prototype that runs in the
 ├── admin.html          # Admin dashboard
 ├── styles.css          # Custom styles
 └── app.js              # Core application logic
-```
+
 
 ## Important Notes
 1. **This is a prototype** - Not production-ready (passwords stored in plaintext)
@@ -57,6 +54,7 @@ If login isn't working:
 2. Check Console for errors
 3. In Application > Local Storage, verify `komiiUsers` exists
 4. Try clearing localStorage and refreshing:
+   
    ```javascript
    localStorage.clear();
    location.reload();
@@ -68,4 +66,4 @@ If login isn't working:
 - Implement server-side persistence
 - Add email notifications
 - Mobile responsiveness enhancements
-```
+
