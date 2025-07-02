@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard | KOMII</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-md hidden md:block">
+            <div class="p-4 border-b">
+                <h3 class="font-semibold text-lg" id="dept-name">Department</h3>
+                <p class="text-sm text-gray-500">Last login: <span id="last-login"></span></p>
+            </div>
+            <nav class="p-2">
+                <a href="dashboard.html" class="block px-4 py-2 text-blue-700 bg-blue-50 rounded-lg font-medium">Dashboard</a>
+                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">My Assignments</a>
+                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Department Queue</a>
+                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Resolved Cases</a>
+                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Reports</a>
+                <a href="#" onclick="logout()" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg mt-4">Logout</a>
+            </nav>
+        </div>
+
+        <!-- Main Panel -->
+        <div class="flex-1 p-8">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-800">Staff Dashboard</h1>
+                <p class="text-gray-600" id="dashboard-greeting">Welcome back! Here's what needs your attention today.</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" id="stats-cards">
+                <!-- Filled by JavaScript -->
+            </div>
+
+            <!-- Complaint List -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-4 border-b flex justify-between items-center">
+                    <h2 class="font-semibold text-lg">Your Assignments</h2>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm text-gray-500" id="assignment-count">0 items</span>
+                        <button id="export-assignments" class="flex items-center px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 10v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Export
+                        </button>
+                    </div>
+                </div>
+                <div class="divide-y divide-gray-200" id="assignments-list">
+                    <!-- Filled by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication and role
+            if (!localStorage.getItem('komiiIsLoggedIn')) {
+                window.location.href = 'auth.html';
+                return;
+            }
+            
+            const user = JSON.parse(localStorage.getItem('komiiUser'));
+            if (user.role !== 'staff') {
+                window.location.href = user.role === 'admin' ? 'admin.html' : 'resident.html';
+                return;
+            }
+            
+            // Set department name
+            document.getElementById('dept-name').textContent = `${user.department.charAt(0).toUpperCase() + user.department.slice(1)} Department`;
+            document.getElementById('last-login').textContent = new Date().toLocaleString();
+            document.getElementById('dashboard-greeting').textContent = `Welcome back, ${user.name.split(' ')[0]}! Here's what needs your attention today.`;
+            
+            // Load department complaints
+            loadDepartmentComplaints(user.department);
+            
+            // Export button
+            document.getElementById('export-assignments').addEventListener('click', function() {
+                alert('Export functionality would be implemented here');
+            });
+            
+            function loadDepartmentComplaints(department) {
+                const allComplaints = JSON.parse(localStorage.getItem('komiiComplaints')) || [];
+                const deptComplaints = allComplaints.filter(c => c.department === department);
+                const assignedComplaints = deptComplaints.filter(c => c.assignedTo === user.email);
+                
+                // Update stats
+                document.getElementById('stats-cards').innerHTML = `
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Active Assignments</p>
+                                <h3 class="text-2xl font-bold">${assignedComplaints.filter(c => c.status !== 'resolved').length}</h3>
+                            </div>
+                            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">${assignedComplaints.filter(c => c.priority === 'high').length} high priority</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Department Queue</p>
+                                <h3 class="text-2xl font-bold">${deptComplaints.filter(c => !c.assignedTo).length}</h3>
+                            </div>
+                            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">${deptComplaints.filter(c => c.priority === 'high').length} urgent</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Resolved This Week</p>
+                                <h3 class="text-2xl font-bold">${deptComplaints.filter(c => c.status === 'resolved' && isThisWeek(new Date(c.updatedAt))).length}</h3>
+                            </div>
+                            <div class="p-3 rounded-full bg-green-100 text-green-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">${deptComplaints.filter(c => c.status === 'resolved').length} total</p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Avg. Resolution Time</p>
+                                <h3 class="text-2xl font-bold">3.2d</h3>
+                            </div>
+                            <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">Department average</p>
+                    </div>
+                `;
+                
+                // Update assignments list
+                document.getElementById('assignment-count').textContent = `${assignedComplaints.length} items`;
+                const assignmentsList = document.getElementById('assignments-list');
+                assignmentsList.innerHTML = '';
+                
+                if (assignedComplaints.length === 0) {
+                    assignmentsList.innerHTML = `
+                        <div class="p-6 text-center text-gray-500">
+                            No assignments currently assigned to you
+                        </div>
+                    `;
+                } else {
+                    assignedComplaints.forEach(complaint => {
+                        const statusClass = complaint.status === 'in-progress' ? 
+                            'bg-yellow-100 text-yellow-800' : 
+                            complaint.status === 'resolved' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800';
+                        const statusText = complaint.status === 'in-progress' ? 'In Progress' : 
+                            complaint.status === 'resolved' ? 'Resolved' : 'New';
+                        
+                        const priorityClass = complaint.priority === 'high' ? 'bg-red-100 text-red-800' : 
+                            complaint.priority === 'medium' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-800';
+                        const priorityText = complaint.priority === 'high' ? 'High' : 
+                            complaint.priority === 'medium' ? 'Medium' : 'Low';
+                        
+                        assignmentsList.innerHTML += `
+                            <div class="p-6 hover:bg-gray-50">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                                            <span class="px-2 py-1 rounded text-xs ${statusClass}">${statusText}</span>
+                                            <span class="px-2 py-1 rounded text-xs ${priorityClass}">${priorityText} Priority</span>
+                                        </div>
+                                        <h3 class="font-medium text-lg mb-1">${complaint.type} - ${complaint.location.split(',')[0]}</h3>
+                                        <p class="text-sm text-gray-600 mb-2">${complaint.description}</p>
+                                        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500">
+                                            <div class="flex items-center">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                    <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                </svg>
+                                                ${complaint.location}
+                                            </div>
+                                            <div class="flex items-center">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                                Reported: ${formatDate(complaint.createdAt)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        ${complaint.status !== 'resolved' ? `
+                                            <button class="resolve-btn p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-full" data-complaint-id="${complaint.id}">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </button>
+                                        ` : ''}
+                                        <a href="complaint.html?track=true&ref=${complaint.id}" class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                // Add event listeners for resolve buttons
+                document.querySelectorAll('.resolve-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const complaintId = this.dataset.complaintId;
+                        const allComplaints = JSON.parse(localStorage.getItem('komiiComplaints')) || [];
+                        const complaint = allComplaints.find(c => c.id === complaintId);
+                        
+                        if (complaint && confirm(`Mark ${complaint.type} at ${complaint.location.split(',')[0]} as resolved?`)) {
+                            complaint.status = 'resolved';
+                            complaint.updatedAt = new Date().toISOString();
+                            complaint.timeline.push({
+                                action: 'Resolved',
+                                time: new Date().toLocaleString(),
+                                officer: user.name
+                            });
+                            
+                            localStorage.setItem('komiiComplaints', JSON.stringify(allComplaints));
+                            loadDepartmentComplaints(user.department);
+                        }
+                    });
+                });
+            }
+            
+            function isThisWeek(date) {
+                const now = new Date();
+                const firstDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+                const lastDayOfWeek = new Date(firstDayOfWeek);
+                lastDayOfWeek.setDate(lastDayOfWeek.getDate() + 6);
+                
+                return date >= firstDayOfWeek && date <= lastDayOfWeek;
+            }
+        });
+    </script>
+</body>
+</html>
