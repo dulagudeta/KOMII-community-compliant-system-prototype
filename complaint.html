@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KOMII - Complaint System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-blue-700 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-2">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                <span class="font-bold text-xl">KOMII</span>
+            </a>
+            <div class="hidden md:flex space-x-6">
+                <a href="index.html" class="hover:text-blue-200">Home</a>
+                <a href="complaint.html" class="hover:text-blue-200 font-semibold">Submit Complaint</a>
+                <a href="complaint.html?track=true" class="hover:text-blue-200">Track Status</a>
+                <a href="#" class="hover:text-blue-200">About</a>
+            </div>
+            <div id="auth-section">
+                <a href="auth.html" class="bg-blue-600 hover:bg-blue-800 px-4 py-2 rounded-lg">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <div id="submit-section" class="hidden max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-blue-700 text-white p-6">
+                <h1 class="text-2xl font-bold">Submit a New Complaint</h1>
+                <p class="mt-2">Help us improve our community by reporting issues</p>
+            </div>
+            
+            <form id="complaint-form" class="p-6 space-y-6">
+                <div>
+                    <label for="complaint-type" class="block text-sm font-medium text-gray-700 mb-1">Type of Complaint*</label>
+                    <select id="complaint-type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select a category</option>
+                        <option value="pothole">Pothole or Road Damage</option>
+                        <option value="trash">Trash or Illegal Dumping</option>
+                        <option value="streetlight">Streetlight Outage</option>
+                        <option value="other">Other Issue</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description*</label>
+                    <textarea id="description" required rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Please describe the issue in detail..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Photo Evidence</label>
+                    <div class="mt-1 flex flex-col items-center space-y-4">
+                        <img id="photo-preview" class="hidden w-full h-48 object-cover rounded-lg border border-gray-300">
+                        <input type="file" id="photo-upload" accept="image/*" class="hidden">
+                        <div class="flex space-x-3 w-full">
+                            <button type="button" id="open-camera" class="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                    <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Capture Now
+                            </button>
+                            <button type="button" onclick="document.getElementById('photo-upload').click()" id="upload-label" class="flex-1 flex items-center justify-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                Upload Photo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="location-section">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Location*</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <input type="text" id="location-input" required placeholder="Address or landmark" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div class="flex space-x-2">
+                            <button type="button" id="current-location-btn" class="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Use Current Location
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Your Contact Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name (Optional)</label>
+                            <input type="text" id="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email (Optional)</label>
+                            <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-gray-200">
+                    <button type="submit" class="px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-semibold">Submit Complaint</button>
+                    <div class="text-center sm:text-right">
+                        <p class="text-sm text-gray-600">Want to save your submissions?</p>
+                        <a href="auth.html?mode=register" class="text-sm font-medium text-blue-600 hover:text-blue-500">Create an account</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div id="track-section" class="hidden max-w-3xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Track Your Complaint</h1>
+                <p class="text-lg text-gray-600">Enter your reference number to check the status</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <form id="tracking-form" class="space-y-4">
+                        <div>
+                            <label for="reference-number" class="block text-sm font-medium text-gray-700 mb-1">Reference Number*</label>
+                            <input type="text" id="reference-number" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. CT-2050">
+                        </div>
+                        <div>
+                            <label for="track-email" class="block text-sm font-medium text-gray-700 mb-1">Email (If Registered)</label>
+                            <input type="email" id="track-email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <button type="submit" class="w-full px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-semibold">Track Complaint</button>
+                    </form>
+                </div>
+                
+                <div id="tracking-result" class="hidden border-t border-gray-200 p-6 bg-gray-50">
+                    <!-- Filled by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Camera Modal -->
+    <div id="camera-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg overflow-hidden w-full max-w-2xl">
+            <div class="p-4 bg-gray-100 flex justify-between items-center">
+                <h3 class="font-medium">Take Photo</h3>
+                <button id="close-camera" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-4">
+                <video id="camera-feed" autoplay playsinline class="w-full bg-black"></video>
+            </div>
+            <div class="p-4 bg-gray-100 flex justify-center">
+                <button id="capture-btn" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full">
+                    Capture Photo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check auth status
+            checkAuthStatus();
+            
+            // Check URL for mode
+            const urlParams = new URLSearchParams(window.location.search);
+            const trackMode = urlParams.get('track') === 'true';
+            
+            // Show appropriate section
+            if (trackMode) {
+                document.getElementById('track-section').classList.remove('hidden');
+                initTracking();
+            } else {
+                document.getElementById('submit-section').classList.remove('hidden');
+                initSubmission();
+            }
+            
+            function initSubmission() {
+                // Camera functionality
+                const cameraBtn = document.getElementById('open-camera');
+                const photoInput = document.getElementById('photo-upload');
+                const photoPreview = document.getElementById('photo-preview');
+                const cameraModal = document.getElementById('camera-modal');
+                const cameraFeed = document.getElementById('camera-feed');
+                const captureBtn = document.getElementById('capture-btn');
+                const closeCamera = document.getElementById('close-camera');
+                let stream = null;
+
+                if (cameraBtn) {
+                    cameraBtn.addEventListener('click', async function() {
+                        try {
+                            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                            cameraFeed.srcObject = stream;
+                            cameraModal.classList.remove('hidden');
+                        } catch (err) {
+                            alert('Could not access camera: ' + err.message);
+                        }
+                    });
+                }
+
+                if (captureBtn) {
+                    captureBtn.addEventListener('click', function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = cameraFeed.videoWidth;
+                        canvas.height = cameraFeed.videoHeight;
+                        canvas.getContext('2d').drawImage(cameraFeed, 0, 0);
+                        
+                        canvas.toBlob(function(blob) {
+                            const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(file);
+                            photoInput.files = dataTransfer.files;
+                            
+                            photoPreview.src = URL.createObjectURL(blob);
+                            photoPreview.classList.remove('hidden');
+                            document.getElementById('upload-label').textContent = 'Change Photo';
+                            
+                            closeCamera.click();
+                        }, 'image/jpeg');
+                    });
+                }
+
+                if (closeCamera) {
+                    closeCamera.addEventListener('click', function() {
+                        if (stream) {
+                            stream.getTracks().forEach(track => track.stop());
+                        }
+                        cameraModal.classList.add('hidden');
+                    });
+                }
+
+                // Current location
+                const locationBtn = document.getElementById('current-location-btn');
+                if (locationBtn) {
+                    locationBtn.addEventListener('click', function() {
+                        if (navigator.geolocation) {
+                            this.disabled = true;
+                            this.innerHTML = '<span class="animate-spin">⌛</span> Locating...';
+                            
+                            navigator.geolocation.getCurrentPosition(position => {
+                                const lat = position.coords.latitude;
+                                const lng = position.coords.longitude;
+                                document.getElementById('location-input').value = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+                                
+                                this.disabled = false;
+                                this.innerHTML = `
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Use Current Location
+                                `;
+                            }, error => {
+                                alert('Could not get location: ' + error.message);
+                                this.disabled = false;
+                                this.innerHTML = `
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Use Current Location
+                                `;
+                            }, {
+                                enableHighAccuracy: true,
+                                timeout: 5000,
+                                maximumAge: 0
+                            });
+                        } else {
+                            alert('Geolocation is not supported by your browser');
+                        }
+                    });
+                }
+
+                // Form submission
+                const complaintForm = document.getElementById('complaint-form');
+                if (complaintForm) {
+                    complaintForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        // Validate required fields
+                        const complaintType = document.getElementById('complaint-type').value;
+                        const description = document.getElementById('description').value;
+                        const location = document.getElementById('location-input').value;
+                        
+                        if (!complaintType || !description || !location) {
+                            alert('Please fill in all required fields');
+                            return;
+                        }
+                        
+                        // Generate reference number
+                        const refNumber = 'CT-' + new Date().getTime().toString().slice(-6);
+                        
+                        // Get photo if available
+                        const photoPreview = document.getElementById('photo-preview');
+                        const photo = photoPreview.src || null;
+                        
+                        // Create complaint object
+                        const complaint = {
+                            id: refNumber,
+                            type: complaintType,
+                            description: description,
+                            location: location,
+                            status: 'submitted',
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString(),
+                            createdBy: document.getElementById('email').value || 'anonymous',
+                            photo: photo,
+                            timeline: [
+                                { action: 'Submitted', time: new Date().toLocaleString() }
+                            ]
+                        };
+                        
+                        // Save to localStorage
+                        const complaints = JSON.parse(localStorage.getItem('komiiComplaints')) || [];
+                        complaints.push(complaint);
+                        localStorage.setItem('komiiComplaints', JSON.stringify(complaints));
+                        
+                        // Show success message
+                        alert(`Complaint submitted successfully!\nReference Number: ${refNumber}\nWe'll notify you of updates.`);
+                        
+                        // Redirect to tracking
+                        window.location.href = `complaint.html?track=true&ref=${refNumber}`;
+                    });
+                }
+                
+                // Photo upload preview
+                if (photoInput) {
+                    photoInput.addEventListener('change', function() {
+                        if (this.files && this.files[0]) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                photoPreview.src = e.target.result;
+                                photoPreview.classList.remove('hidden');
+                                document.getElementById('upload-label').textContent = 'Change Photo';
+                            };
+                            reader.readAsDataURL(this.files[0]);
+                        }
+                    });
+                }
+            }
+            
+            function initTracking() {
+                // Check for reference in URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const refParam = urlParams.get('ref');
+                
+                if (refParam) {
+                    document.getElementById('reference-number').value = refParam;
+                    showTrackingResult(refParam);
+                }
+
+                // Form submission
+                const trackingForm = document.getElementById('tracking-form');
+                if (trackingForm) {
+                    trackingForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        const refNumber = document.getElementById('reference-number').value;
+                        showTrackingResult(refNumber);
+                    });
+                }
+
+                function showTrackingResult(refNumber) {
+                    const allComplaints = JSON.parse(localStorage.getItem('komiiComplaints')) || [];
+                    const complaint = allComplaints.find(c => c.id === refNumber);
+                    
+                    if (!complaint) {
+                        document.getElementById('tracking-result').innerHTML = `
+                            <div class="p-6 text-center text-gray-500">
+                                <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <h3 class="mt-4 text-lg font-medium">Complaint not found</h3>
+                                <p class="mt-1">No complaint found with reference number ${refNumber}</p>
+                                <button onclick="window.location.href='complaint.html'" class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+                                    Submit New Complaint
+                                </button>
+                            </div>
+                        `;
+                        document.getElementById('tracking-result').classList.remove('hidden');
+                        return;
+                    }
+                    
+                    const statusClass = complaint.status === 'submitted' ? 'bg-blue-100 text-blue-800' :
+                                        complaint.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' : 
+                                        'bg-green-100 text-green-800';
+                    const statusText = complaint.status === 'submitted' ? 'Submitted' :
+                                      complaint.status === 'in-progress' ? 'In Progress' : 'Resolved';
+
+                    let timelineHTML = '';
+                    (complaint.timeline || []).forEach((item, index) => {
+                        timelineHTML += `
+                            <div class="relative pl-12 pb-6">
+                                <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                <h4 class="font-medium text-gray-900">${item.action}</h4>
+                                <p class="text-sm text-gray-500">${item.time}</p>
+                                ${item.officer ? `<p class="text-xs text-gray-600 mt-1">Officer: ${item.officer}</p>` : ''}
+                            </div>
+                        `;
+                    });
+
+                    if (complaint.status !== 'resolved') {
+                        timelineHTML += `
+                            <div class="relative pl-12">
+                                <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <h4 class="font-medium text-gray-900">Resolution In Progress</h4>
+                                <p class="text-sm text-gray-500">Expected completion soon</p>
+                                <div class="mt-2">
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${complaint.status === 'submitted' ? '30%' : '65%'}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    let complaintDetails = `
+                        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-medium mb-2">Complaint Details</h4>
+                            <p class="text-sm"><strong>Type:</strong> ${complaint.type}</p>
+                            <p class="text-sm mt-1"><strong>Description:</strong> ${complaint.description}</p>
+                            <p class="text-sm mt-1"><strong>Location:</strong> ${complaint.location}</p>
+                    `;
+                    
+                    if (complaint.photo) {
+                        complaintDetails += `
+                            <div class="mt-2">
+                                <h5 class="text-sm font-medium">Submitted Photo</h5>
+                                <img src="${complaint.photo}" class="mt-1 w-full h-32 object-cover rounded-lg border border-gray-200">
+                            </div>
+                        `;
+                    }
+                    
+                    complaintDetails += `</div>`;
+
+                    document.getElementById('tracking-result').innerHTML = `
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 class="text-lg font-semibold">${complaint.type}</h3>
+                                <p class="text-sm text-gray-500">Reference: ${complaint.id}</p>
+                            </div>
+                            <span class="px-3 py-1 ${statusClass} text-sm font-medium rounded-full">${statusText}</span>
+                        </div>
+                        
+                        <div class="relative">
+                            <div class="absolute left-4 top-0 h-full w-0.5 bg-gray-200"></div>
+                            ${timelineHTML}
+                        </div>
+                        
+                        ${complaintDetails}
+                        
+                        <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                            <button onclick="window.print()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                                Print Details
+                            </button>
+                            ${complaint.status !== 'resolved' ? 
+                                `<button class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
+                                    Request Update
+                                </button>` : ''}
+                            <button class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-sm font-medium">
+                                Provide Feedback
+                            </button>
+                        </div>
+                    `;
+
+                    document.getElementById('tracking-result').classList.remove('hidden');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

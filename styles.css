@@ -1,0 +1,78 @@
+/* Base Styles */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.5;
+}
+
+/* Custom components */
+.btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+}
+
+.btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors;
+}
+
+.card {
+    @apply bg-white rounded-lg shadow-md overflow-hidden;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Print styles */
+@media print {
+    nav, .no-print {
+        display: none !important;
+    }
+    
+    body {
+        padding: 20px;
+        background: white;
+        color: black;
+    }
+    
+    .print-full-width {
+        width: 100% !important;
+    }
+}
+
+/* Utility classes */
+.hover-scale {
+    @apply transition-transform hover:scale-105;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
