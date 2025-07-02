@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resident Dashboard | KOMII</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-md hidden md:block">
+            <div class="p-4 border-b">
+                <h3 class="font-semibold text-lg">Your Account</h3>
+                <p class="text-sm text-gray-500">Resident Dashboard</p>
+            </div>
+            <nav class="p-2">
+                <a href="resident.html" class="block px-4 py-2 text-blue-700 bg-blue-50 rounded-lg font-medium">Dashboard</a>
+                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">My Complaints</a>
+                <a href="complaint.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Submit New</a>
+                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Notifications</a>
+                <a href="#" onclick="logout()" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg mt-4">Logout</a>
+            </nav>
+        </div>
+
+        <!-- Main Panel -->
+        <div class="flex-1 p-8">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-800" id="resident-greeting">Resident Dashboard</h1>
+                <p class="text-gray-600">View your submitted complaints and their status</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500">Total Complaints</p>
+                            <h3 class="text-2xl font-bold" id="total-complaints">0</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500">In Progress</p>
+                            <h3 class="text-2xl font-bold" id="in-progress">0</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500">Resolved</p>
+                            <h3 class="text-2xl font-bold" id="resolved">0</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-green-100 text-green-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complaint List -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-4 border-b flex justify-between items-center">
+                    <h2 class="font-semibold text-lg">Your Complaints</h2>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm text-gray-500" id="complaint-count">0 items</span>
+                        <button id="new-complaint" class="flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            New Complaint
+                        </button>
+                    </div>
+                </div>
+                <div class="divide-y divide-gray-200" id="complaints-list">
+                    <!-- Filled by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication and role
+            if (!localStorage.getItem('komiiIsLoggedIn')) {
+                window.location.href = 'auth.html';
+                return;
+            }
+            
+            const user = JSON.parse(localStorage.getItem('komiiUser'));
+            if (user.role !== 'resident') {
+                window.location.href = user.role === 'admin' ? 'admin.html' : 'dashboard.html';
+                return;
+            }
+            
+            // Set greeting
+            document.getElementById('resident-greeting').textContent = `Welcome back, ${user.name.split(' ')[0]}!`;
+            
+            // Load complaints
+            loadResidentComplaints(user.email);
+            
+            // New complaint button
+            document.getElementById('new-complaint').addEventListener('click', function() {
+                window.location.href = 'complaint.html';
+            });
+            
+            function loadResidentComplaints(email) {
+                const allComplaints = JSON.parse(localStorage.getItem('komiiComplaints')) || [];
+                const residentComplaints = allComplaints.filter(c => c.createdBy === email);
+                
+                // Update stats
+                document.getElementById('total-complaints').textContent = residentComplaints.length;
+                document.getElementById('in-progress').textContent = residentComplaints.filter(c => c.status === 'in-progress').length;
+                document.getElementById('resolved').textContent = residentComplaints.filter(c => c.status === 'resolved').length;
+                document.getElementById('complaint-count').textContent = `${residentComplaints.length} items`;
+                
+                // Update complaints list
+                const complaintsList = document.getElementById('complaints-list');
+                complaintsList.innerHTML = '';
+                
+                if (residentComplaints.length === 0) {
+                    complaintsList.innerHTML = `
+                        <div class="p-6 text-center text-gray-500">
+                            You haven't submitted any complaints yet
+                            <div class="mt-4">
+                                <button onclick="window.location.href='complaint.html'" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+                                    Submit Your First Complaint
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    residentComplaints.forEach(complaint => {
+                        const statusClass = complaint.status === 'in-progress' ? 
+                            'bg-yellow-100 text-yellow-800' : 
+                            complaint.status === 'resolved' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800';
+                        const statusText = complaint.status === 'in-progress' ? 'In Progress' : 
+                            complaint.status === 'resolved' ? 'Resolved' : 'Submitted';
+                        
+                        complaintsList.innerHTML += `
+                            <div class="p-6 hover:bg-gray-50">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="px-2 py-1 rounded text-xs ${statusClass}">${statusText}</span>
+                                            <span class="text-sm text-gray-500">${complaint.id}</span>
+                                        </div>
+                                        <h3 class="font-medium text-lg mb-1">${complaint.type}</h3>
+                                        <p class="text-sm text-gray-600 mb-2">${complaint.description.substring(0, 80)}...</p>
+                                        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500">
+                                            <div class="flex items-center">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                    <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                </svg>
+                                                ${complaint.location.split(',')[0]}
+                                            </div>
+                                            <div class="flex items-center">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                                ${formatDate(complaint.createdAt)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <a href="complaint.html?track=true&ref=${complaint.id}" class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
