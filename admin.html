@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | KOMII</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-100">
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-md hidden md:block">
+            <div class="p-4 border-b">
+                <h3 class="font-semibold text-lg">KOMII Administration</h3>
+                <p class="text-sm text-gray-500">Super Admin Access</p>
+            </div>
+            <nav class="p-2">
+                <a href="#" class="tab-button block px-4 py-2 text-blue-700 bg-blue-50 rounded-lg font-medium" data-tab="overview">Overview</a>
+                <a href="#" class="tab-button block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg" data-tab="complaints">Complaints</a>
+                <a href="#" class="tab-button block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg" data-tab="users">Users</a>
+                <a href="#" class="tab-button block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg" data-tab="reports">Reports</a>
+                <a href="#" onclick="logout()" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg mt-4">Logout</a>
+            </nav>
+        </div>
+
+        <!-- Main Panel -->
+        <div class="flex-1 p-8">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+                <div class="flex space-x-4 mt-4 border-b border-gray-200" id="admin-tabs">
+                    <!-- Tabs filled by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Tab Content -->
+            <div id="tab-content">
+                <!-- Overview Tab -->
+                <div id="overview" class="tab-content space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">System Overview</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                    <p class="text-gray-500">Total Complaints</p>
+                                    <h4 class="text-2xl font-bold" id="total-complaints">0</h4>
+                                </div>
+                                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                    <p class="text-gray-500">Active Users</p>
+                                    <h4 class="text-2xl font-bold" id="total-users">0</h4>
+                                </div>
+                                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                    <p class="text-gray-500">Departments</p>
+                                    <h4 class="text-2xl font-bold" id="total-depts">0</h4>
+                                </div>
+                                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                    <p class="text-gray-500">Avg. Resolution</p>
+                                    <h4 class="text-2xl font-bold" id="avg-resolution">0d</h4>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">Quick Actions</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <button class="flex items-center justify-center p-4 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">
+                                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    Add New User
+                                </button>
+                                <button class="flex items-center justify-center p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100">
+                                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    Generate Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">Complaints Overview</h3>
+                            <canvas id="complaintsChart"></canvas>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">Resolution Times</h3>
+                            <canvas id="resolutionTimeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Complaints Tab -->
+                <div id="complaints" class="tab-content hidden">
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b flex justify-between items-center">
+                            <h2 class="font-semibold text-lg">All Complaints</h2>
+                            <div class="flex items-center space-x-3">
+                                <select id="complaint-filter" class="px-3 py-1 border border-gray-300 rounded-lg text-sm">
+                                    <option value="all">All Statuses</option>
+                                    <option value="submitted">Submitted</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="resolved">Resolved</option>
+                                </select>
+                                <button id="export-complaints" class="flex items-center px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="complaints-table-body">
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Users Tab -->
+                <div id="users" class="tab-content hidden">
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b flex justify-between items-center">
+                            <h2 class="font-semibold text-lg">User Management</h2>
+                            <button id="add-user-btn" class="flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm">
+                                Add New User
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="users-table-body">
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reports Tab -->
+                <div id="reports" class="tab-content hidden">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="font-semibold text-lg mb-6">Generate Reports</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                                <h4 class="font-medium mb-2">Complaints Summary</h4>
+                                <p class="text-sm text-gray-600 mb-3">Monthly summary of all complaints</p>
+                                <button class="text-sm text-blue-600 hover:text-blue-800">Generate</button>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                                <h4 class="font-medium mb-2">Department Performance</h4>
+                                <p class="text-sm text-gray-600 mb-3">Resolution times by department</p>
+                                <button class="text-sm text-blue-600 hover:text-blue-800">Generate</button>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                                <h4 class="font-medium mb-2">User Activity</h4>
+                                <p class="text-sm text-gray-600 mb-3">Staff response times and activity</p>
+                                <button class="text-sm text-blue-600 hover:text-blue-800">Generate</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication and role
+            if (!localStorage.getItem('komiiIsLoggedIn')) {
+                window.location.href = 'auth.html';
+                return;
+            }
+            
+            const user = JSON.parse(localStorage.getItem('komiiUser'));
+            if (user.role !== 'admin') {
+                window.location.href = user.role === 'staff' ? 'dashboard.html' : 'resident.html';
+                return;
+            }
+            
+            // Initialize tabs
+            const tabs = [
+                { id: 'overview', name: 'Overview' },
+                { id: 'complaints', name: 'Complaints' },
+                { id: 'users', name: 'Users' },
+                { id: 'users', name: 'Users' },
+                { id: 'reports', name: 'Reports' }
+            ];
+            
+            document.getElementById('admin-tabs').innerHTML = tabs.map((tab, index) => `
+                <button class="tab-button px-4 py-2 ${index === 0 ? 'bg-blue-100 text-blue-800' : 'text-gray-600 hover:text-gray-800'} rounded-t-lg" data-tab="${tab.id}">
+                    ${tab.name}
+                </button>
+            `).join('');
+            
+            // Tab switching
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    
+                    document.querySelectorAll('.tab-content').forEach(tab => {
+                        tab.classList.add('hidden');
+                    });
+                    
+                    document.getElementById(tabId).classList.remove('hidden');
+                    
+                    document.querySelectorAll('.tab-button').forEach(btn => {
+                        btn.classList.remove('bg-blue-100', 'text-blue-800');
+                        btn.classList.add('text-gray-600', 'hover:text-gray-800');
+                    });
+                    
+                    this.classList.remove('text-gray-600', 'hover:text-gray-800');
+                    this.classList.add('bg-blue-100', 'text-blue-800');
+                    
+                    // Load data when tab is selected
+                    if (tabId === 'overview') {
+                        loadOverviewData();
+                    } else if (tabId === 'complaints') {
+                        loadComplaintsData();
+                    } else if (tabId === 'users') {
+                        loadUsersData();
+                    }
+                });
+            });
+            
+            // Load initial data
+            loadOverviewData();
+            
+            function loadOverviewData() {
+                const complaints = JSON.parse(localStorage.getItem('komiiComplaints')) || [];
+                const users = JSON.parse(localStorage.getItem('komiiUsers')) || [];
+                
+                // Update stats
+                document.getElementById('total-complaints').textContent = complaints.length;
+                document.getElementById('total-users').textContent = users.length;
+                
+                // Count departments
+                const departments = new Set();
+                complaints.forEach(c => c.department && departments.add(c.department));
+                document.getElementById('total-depts').textContent = departments.size;
+                
+                // Initialize charts
+                initCharts();
+            }
+            
+            function loadComplaintsData() {
+                const complaints = JSON.parse(localStorage.getItem('komiiComplaints')) || [];
+                const tbody = document.getElementById('complaints-table-body');
+                
+                tbody.innerHTML = complaints.map(complaint => `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${complaint.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${complaint.type}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${complaint.location}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 rounded-full text-xs ${
+                                complaint.status === 'submitted' ? 'bg-blue-100 text-blue-800' :
+                                complaint.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-green-100 text-green-800'
+                            }">
+                                ${complaint.status === 'submitted' ? 'Submitted' :
+                                  complaint.status === 'in-progress' ? 'In Progress' : 'Resolved'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${complaint.department || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <a href="complaint.html?track=true&ref=${complaint.id}" class="text-blue-600 hover:text-blue-900">View</a>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            function loadUsersData() {
+                const users = JSON.parse(localStorage.getItem('komiiUsers')) || [];
+                const tbody = document.getElementById('users-table-body');
+                
+                tbody.innerHTML = users.map(user => `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${user.name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.email}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.role}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.department || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <button class="text-blue-600 hover:text-blue-900 mr-3 edit-user-btn" data-user-id="${user.id}">Edit</button>
+                            <button class="text-red-600 hover:text-red-900 deactivate-user-btn" data-user-id="${user.id}">Deactivate</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            function initCharts() {
+                // Complaints chart
+                new Chart(document.getElementById('complaintsChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Complaints Received',
+                            data: [120, 190, 170, 220, 240, 195],
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        }, {
+                            label: 'Complaints Resolved',
+                            data: [90, 150, 140, 180, 200, 160],
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+                // Resolution time chart
+                new Chart(document.getElementById('resolutionTimeChart').getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Average Resolution Time (days)',
+                            data: [5.2, 4.8, 4.5, 4.2, 3.9, 3.7],
+                            backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                            borderColor: 'rgba(139, 92, 246, 1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
