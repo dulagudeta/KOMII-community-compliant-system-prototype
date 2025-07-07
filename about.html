@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About KOMII | Community Improvement System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-blue-700 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-2">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                <span class="font-bold text-xl">KOMII</span>
+            </a>
+            <div class="hidden md:flex space-x-6">
+                <a href="index.html" class="hover:text-blue-200">Home</a>
+                <a href="complaint.html" class="hover:text-blue-200">Submit Complaint</a>
+                <a href="complaint.html?track=true" class="hover:text-blue-200">Track Status</a>
+                <a href="about.html" class="hover:text-blue-200 font-semibold">About</a>
+            </div>
+            <div id="auth-section">
+                <a href="auth.html" class="bg-blue-600 hover:bg-blue-800 px-4 py-2 rounded-lg">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-12">
+        <section class="mb-16 text-center">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">About KOMII</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Connecting communities with their local government to resolve issues efficiently
+            </p>
+        </section>
+
+        <section class="mb-16">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">Our Mission</h2>
+                    <p class="text-gray-600 mb-6">
+                        KOMII (Community Issues Management and Improvement Initiative) was created to bridge the gap between residents and local government departments. 
+                        Our platform makes it easy to report, track, and resolve community issues in a transparent and efficient manner.
+                    </p>
+                    <p class="text-gray-600">
+                        By streamlining communication and providing real-time updates, we help create cleaner, safer, and better-maintained communities for everyone.
+                    </p>
+                </div>
+                <div class="bg-blue-50 rounded-xl p-8">
+                    <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" 
+                         alt="Community working together" 
+                         class="rounded-lg shadow-md w-full h-auto">
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-12 text-center">How It Works</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                    <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">1. Report an Issue</h3>
+                    <p class="text-gray-600">
+                        Residents can easily report issues like potholes, illegal dumping, or broken streetlights through our simple form.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                    <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">2. Automatic Routing</h3>
+                    <p class="text-gray-600">
+                        The system automatically routes each complaint to the appropriate department for quick resolution.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                    <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">3. Track Progress</h3>
+                    <p class="text-gray-600">
+                        Residents can track the status of their complaints and receive updates until the issue is resolved.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16 bg-blue-50 rounded-xl p-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Our Impact</h2>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div>
+                    <h3 class="text-4xl font-bold text-blue-700 mb-2">2,500+</h3>
+                    <p class="text-gray-600">Issues Reported</p>
+                </div>
+                <div>
+                    <h3 class="text-4xl font-bold text-blue-700 mb-2">85%</h3>
+                    <p class="text-gray-600">Resolution Rate</p>
+                </div>
+                <div>
+                    <h3 class="text-4xl font-bold text-blue-700 mb-2">3.2d</h3>
+                    <p class="text-gray-600">Average Resolution Time</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="font-semibold text-lg mb-2">Who can use KOMII?</h3>
+                    <p class="text-gray-600">
+                        KOMII is available to all residents within our service area. You can submit complaints as a guest or create an account to track your submissions.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="font-semibold text-lg mb-2">What types of issues can I report?</h3>
+                    <p class="text-gray-600">
+                        You can report various community issues including road damage, sanitation problems, public safety concerns, and more. 
+                        Our system will route your complaint to the appropriate department.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="font-semibold text-lg mb-2">How long does it take to resolve issues?</h3>
+                    <p class="text-gray-600">
+                        Resolution times vary depending on the issue type and complexity. Most simple issues are resolved within 3-5 business days, 
+                        while more complex problems may take longer. You'll receive updates throughout the process.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="font-semibold text-lg mb-2">Is there a mobile app available?</h3>
+                    <p class="text-gray-600">
+                        Currently KOMII is web-based and works on all mobile browsers. We're developing a dedicated mobile app that will be available soon.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-blue-700 text-white rounded-xl p-12 text-center">
+            <h2 class="text-3xl font-bold mb-4">Ready to improve your community?</h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto">Join thousands of residents who are making their neighborhoods better</p>
+            <a href="complaint.html" class="inline-block bg-white text-blue-700 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold text-lg shadow-lg">
+                Submit a Complaint
+            </a>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">KOMII</h3>
+                    <p class="text-gray-400">Helping communities work together to solve problems efficiently.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="complaint.html" class="text-gray-400 hover:text-white">Submit Complaint</a></li>
+                        <li><a href="complaint.html?track=true" class="text-gray-400 hover:text-white">Track Status</a></li>
+                        <li><a href="about.html" class="text-gray-400 hover:text-white">About</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contact</h3>
+                    <p class="text-gray-400">contact@komii.gov</p>
+                    <p class="text-gray-400">(555) 123-4567</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2023 KOMII. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check auth status
+            checkAuthStatus();
+        });
+    </script>
+</body>
+</html>
