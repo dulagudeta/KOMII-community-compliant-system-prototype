@@ -56,10 +56,10 @@
                 </div>
                 
                 <div>
-        <button type="button" id="auth-submit-btn" class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold">
-            Sign In
-        </button>
-    </div>
+                    <button type="submit" id="auth-submit-btn" class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold">
+                        Sign In
+                    </button>
+                </div>
             </form>
 
             <div class="mt-6 text-center">
@@ -73,13 +73,17 @@
     <script src="app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize data if not exists
+            if (!localStorage.getItem('komiiUsers')) {
+                initializeData();
+            }
+
             const urlParams = new URLSearchParams(window.location.search);
             const mode = urlParams.get('mode') || 'login';
             
             const authForm = document.getElementById('auth-form');
             const authTitle = document.getElementById('auth-title');
             const authSubtitle = document.getElementById('auth-subtitle');
-            const authSubmit = document.getElementById('auth-submit');
             const authSwitch = document.getElementById('auth-switch');
             const nameFields = document.getElementById('name-fields');
             const confirmPasswordField = document.getElementById('confirm-password-field');
@@ -122,24 +126,20 @@
             });
             
             // Form submission
-            const authSubmitBtn = document.getElementById('auth-submit-btn');
-    if (authSubmitBtn) {
-        authSubmitBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            if (mode === 'login') {
-                handleLogin();
-            } else {
-                handleRegister();
-            }
-        });
-    }
+            authForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (mode === 'login') {
+                    handleLogin();
+                } else {
+                    handleRegister();
+                }
+            });
             
             function setAuthMode(newMode) {
                 if (newMode === 'register') {
                     authTitle.textContent = 'Create Account';
                     authSubtitle.textContent = 'Join KOMII to track your complaints';
-                    authSubmit.textContent = 'Create Account';
                     authSwitch.innerHTML = 'Already have an account? <a href="#" class="text-blue-600 hover:text-blue-500 font-medium">Sign in</a>';
                     nameFields.classList.remove('hidden');
                     confirmPasswordField.classList.remove('hidden');
@@ -147,7 +147,6 @@
                 } else {
                     authTitle.textContent = 'Welcome Back';
                     authSubtitle.textContent = 'Sign in to your KOMII account';
-                    authSubmit.textContent = 'Sign In';
                     authSwitch.innerHTML = 'Don\'t have an account? <a href="#" class="text-blue-600 hover:text-blue-500 font-medium">Create one</a>';
                     nameFields.classList.add('hidden');
                     confirmPasswordField.classList.add('hidden');
@@ -159,41 +158,41 @@
                 window.history.replaceState({}, '', `auth.html?mode=${newMode}`);
             }
             
-           function handleLogin() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    
-    if (!email || !password) {
-        alert('Please fill in all fields');
-        return;
-    }
-    
-    // Debug: Show what's in localStorage
-    console.log("Users in localStorage:", JSON.parse(localStorage.getItem('komiiUsers')));
-    
-    const users = JSON.parse(localStorage.getItem('komiiUsers')) || [];
-    const user = users.find(u => u.email === email && u.password === password);
-    
-    if (!user) {
-        alert('Invalid email or password. Try these:\nAdmin: admin@komii.gov/admin123\nStaff: worker@komii.gov/worker123\nResident: resident@example.com/resident123');
-        return;
-    }
-    
-    localStorage.setItem('komiiUser', JSON.stringify(user));
-    localStorage.setItem('komiiIsLoggedIn', 'true');
-    
-    // Debug: Show login success
-    console.log("Login successful, user:", user);
-    
-    // Redirect based on role
-    if (user.role === 'admin') {
-        window.location.href = 'admin.html';
-    } else if (user.role === 'staff') {
-        window.location.href = 'dashboard.html';
-    } else {
-        window.location.href = 'resident.html';
-    }
-}
+            function handleLogin() {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                if (!email || !password) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+                
+                console.log("Attempting login with:", email);
+                
+                const users = JSON.parse(localStorage.getItem('komiiUsers')) || [];
+                console.log("Users in system:", users);
+                
+                const user = users.find(u => u.email === email && u.password === password);
+                
+                if (!user) {
+                    alert('Invalid email or password. Try these:\nAdmin: admin@komii.gov/admin123\nStaff: worker@komii.gov/worker123\nResident: resident@example.com/resident123');
+                    return;
+                }
+                
+                localStorage.setItem('komiiUser', JSON.stringify(user));
+                localStorage.setItem('komiiIsLoggedIn', 'true');
+                
+                console.log("Login successful, redirecting...");
+                
+                // Redirect based on role
+                if (user.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else if (user.role === 'staff') {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    window.location.href = 'resident.html';
+                }
+            }
             
             function handleRegister() {
                 const firstName = document.getElementById('first-name').value;
