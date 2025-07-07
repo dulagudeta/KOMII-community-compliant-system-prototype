@@ -6,6 +6,7 @@
     <title>KOMII - Authentication</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css">
+    <script src="app.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center">
     <div class="max-w-md w-full mx-auto p-6">
@@ -70,17 +71,13 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
     <script>
+        // Authentication Controller
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize data if not exists
-            if (!localStorage.getItem('komiiUsers')) {
-                initializeData();
-            }
+            // Ensure data is initialized
+            initializeData();
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const mode = urlParams.get('mode') || 'login';
-            
+            // DOM Elements
             const authForm = document.getElementById('auth-form');
             const authTitle = document.getElementById('auth-title');
             const authSubtitle = document.getElementById('auth-subtitle');
@@ -90,6 +87,10 @@
             const termsField = document.getElementById('terms-field');
             const passwordInput = document.getElementById('password');
             const passwordStrength = document.getElementById('password-strength');
+
+            // Get mode from URL (login or register)
+            const urlParams = new URLSearchParams(window.location.search);
+            let mode = urlParams.get('mode') || 'login';
             
             // Set initial mode
             setAuthMode(mode);
@@ -97,36 +98,19 @@
             // Switch between login/register
             authSwitch.addEventListener('click', function(e) {
                 e.preventDefault();
-                const newMode = authSwitch.textContent.includes('Don\'t') ? 'register' : 'login';
-                setAuthMode(newMode);
+                mode = mode === 'login' ? 'register' : 'login';
+                setAuthMode(mode);
             });
             
             // Password strength indicator
-            passwordInput.addEventListener('input', function() {
+            passwordInput?.addEventListener('input', function() {
                 if (mode === 'register') {
-                    const strength = calculatePasswordStrength(this.value);
-                    let message = '';
-                    let color = '';
-                    
-                    if (strength < 2) {
-                        message = 'Weak';
-                        color = 'text-red-600';
-                    } else if (strength < 4) {
-                        message = 'Moderate';
-                        color = 'text-yellow-600';
-                    } else {
-                        message = 'Strong';
-                        color = 'text-green-600';
-                    }
-                    
-                    passwordStrength.textContent = `Password strength: ${message}`;
-                    passwordStrength.className = `text-xs mt-1 ${color}`;
-                    passwordStrength.classList.remove('hidden');
+                    updatePasswordStrength(this.value);
                 }
             });
             
             // Form submission
-            authForm.addEventListener('submit', function(e) {
+            authForm?.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
                 if (mode === 'login') {
@@ -135,97 +119,99 @@
                     handleRegister();
                 }
             });
-            
+
+            // Set the auth mode (login/register)
             function setAuthMode(newMode) {
-                if (newMode === 'register') {
+                mode = newMode;
+                
+                if (mode === 'register') {
                     authTitle.textContent = 'Create Account';
                     authSubtitle.textContent = 'Join KOMII to track your complaints';
                     authSwitch.innerHTML = 'Already have an account? <a href="#" class="text-blue-600 hover:text-blue-500 font-medium">Sign in</a>';
-                    nameFields.classList.remove('hidden');
-                    confirmPasswordField.classList.remove('hidden');
-                    termsField.classList.remove('hidden');
+                    nameFields?.classList.remove('hidden');
+                    confirmPasswordField?.classList.remove('hidden');
+                    termsField?.classList.remove('hidden');
                 } else {
                     authTitle.textContent = 'Welcome Back';
                     authSubtitle.textContent = 'Sign in to your KOMII account';
                     authSwitch.innerHTML = 'Don\'t have an account? <a href="#" class="text-blue-600 hover:text-blue-500 font-medium">Create one</a>';
-                    nameFields.classList.add('hidden');
-                    confirmPasswordField.classList.add('hidden');
-                    termsField.classList.add('hidden');
-                    passwordStrength.classList.add('hidden');
+                    nameFields?.classList.add('hidden');
+                    confirmPasswordField?.classList.add('hidden');
+                    termsField?.classList.add('hidden');
+                    passwordStrength?.classList.add('hidden');
                 }
                 
-                // Update URL
-                window.history.replaceState({}, '', `auth.html?mode=${newMode}`);
+                // Update URL without reload
+                window.history.replaceState({}, '', `auth.html?mode=${mode}`);
             }
-            
+
+            // Handle login process
             function handleLogin() {
-                const email = document.getElementById('email').value;
+                const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value;
                 
                 if (!email || !password) {
-                    alert('Please fill in all fields');
+                    showAlert('Please fill in all fields', 'error');
                     return;
                 }
                 
-                console.log("Attempting login with:", email);
+                const result = login(email, password);
                 
-                const users = JSON.parse(localStorage.getItem('komiiUsers')) || [];
-                console.log("Users in system:", users);
-                
-                const user = users.find(u => u.email === email && u.password === password);
-                
-                if (!user) {
-                    alert('Invalid email or password. Try these:\nAdmin: admin@komii.gov/admin123\nStaff: worker@komii.gov/worker123\nResident: resident@example.com/resident123');
-                    return;
-                }
-                
-                localStorage.setItem('komiiUser', JSON.stringify(user));
-                localStorage.setItem('komiiIsLoggedIn', 'true');
-                
-                console.log("Login successful, redirecting...");
-                
-                // Redirect based on role
-                if (user.role === 'admin') {
-                    window.location.href = 'admin.html';
-                } else if (user.role === 'staff') {
-                    window.location.href = 'dashboard.html';
+                if (result.success) {
+                    showAlert('Login successful! Redirecting...', 'success');
+                    
+                    // Redirect based on role
+                    setTimeout(() => {
+                        switch(result.user.role) {
+                            case 'admin':
+                                window.location.href = 'admin.html';
+                                break;
+                            case 'staff':
+                                window.location.href = 'dashboard.html';
+                                break;
+                            default:
+                                window.location.href = 'resident.html';
+                        }
+                    }, 1000);
                 } else {
-                    window.location.href = 'resident.html';
+                    showAlert(result.message || 'Invalid email or password', 'error');
                 }
             }
-            
+
+            // Handle registration process
             function handleRegister() {
-                const firstName = document.getElementById('first-name').value;
-                const lastName = document.getElementById('last-name').value;
-                const email = document.getElementById('email').value;
+                const firstName = document.getElementById('first-name').value.trim();
+                const lastName = document.getElementById('last-name').value.trim();
+                const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('confirm-password').value;
-                const terms = document.getElementById('terms').checked;
+                const terms = document.getElementById('terms')?.checked;
                 
+                // Validation
                 if (!firstName || !lastName || !email || !password || !confirmPassword) {
-                    alert('Please fill in all fields');
+                    showAlert('Please fill in all fields', 'error');
                     return;
                 }
                 
                 if (password !== confirmPassword) {
-                    alert('Passwords do not match');
+                    showAlert('Passwords do not match', 'error');
                     return;
                 }
                 
                 if (password.length < 8) {
-                    alert('Password must be at least 8 characters');
+                    showAlert('Password must be at least 8 characters', 'error');
                     return;
                 }
                 
-                if (!terms) {
-                    alert('You must accept the terms and conditions');
+                if (terms === false) {
+                    showAlert('You must accept the terms and conditions', 'error');
                     return;
                 }
                 
                 const users = JSON.parse(localStorage.getItem('komiiUsers')) || [];
                 
                 if (users.some(u => u.email === email)) {
-                    alert('Email already registered');
+                    showAlert('Email already registered', 'error');
                     return;
                 }
                 
@@ -233,9 +219,11 @@
                     id: Date.now(),
                     name: `${firstName} ${lastName}`,
                     email,
-                    password,
+                    password, // Note: In production, hash this password
                     role: 'resident',
-                    createdAt: new Date().toISOString()
+                    active: true,
+                    createdAt: new Date().toISOString(),
+                    lastLogin: null
                 };
                 
                 users.push(newUser);
@@ -243,13 +231,39 @@
                 localStorage.setItem('komiiUser', JSON.stringify(newUser));
                 localStorage.setItem('komiiIsLoggedIn', 'true');
                 
-                window.location.href = 'resident.html';
+                showAlert('Registration successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'resident.html';
+                }, 1500);
             }
-            
+
+            // Update password strength indicator
+            function updatePasswordStrength(password) {
+                const strength = calculatePasswordStrength(password);
+                let message = '';
+                let color = '';
+                
+                if (strength < 2) {
+                    message = 'Weak';
+                    color = 'text-red-600';
+                } else if (strength < 4) {
+                    message = 'Moderate';
+                    color = 'text-yellow-600';
+                } else {
+                    message = 'Strong';
+                    color = 'text-green-600';
+                }
+                
+                passwordStrength.textContent = `Password strength: ${message}`;
+                passwordStrength.className = `text-xs mt-1 ${color}`;
+                passwordStrength.classList.remove('hidden');
+            }
+
+            // Calculate password strength
             function calculatePasswordStrength(password) {
                 let strength = 0;
                 
-                // Length contributes up to 3 points
+                // Length (up to 3 points)
                 strength += Math.min(3, Math.floor(password.length / 3));
                 
                 // Has uppercase letters
@@ -262,6 +276,25 @@
                 if (/[^A-Za-z0-9]/.test(password)) strength++;
                 
                 return strength;
+            }
+
+            // Show alert message
+            function showAlert(message, type = 'info') {
+                // Remove existing alerts
+                const existingAlert = document.getElementById('auth-alert');
+                if (existingAlert) existingAlert.remove();
+                
+                const alertDiv = document.createElement('div');
+                alertDiv.id = 'auth-alert';
+                alertDiv.className = `p-4 mb-4 rounded-lg ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+                alertDiv.textContent = message;
+                
+                authForm?.prepend(alertDiv);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
             }
         });
     </script>
