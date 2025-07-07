@@ -57,7 +57,7 @@
                 </div>
                 
                 <div>
-                    <button type="submit" id="auth-submit-btn" class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold">
+                    <button type="button" id="auth-submit-btn" class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold">
                         Sign In
                     </button>
                 </div>
@@ -75,7 +75,9 @@
         // Authentication Controller
         document.addEventListener('DOMContentLoaded', function() {
             // Ensure data is initialized
-            initializeData();
+            if (!localStorage.getItem('komiiInitialized')) {
+                initializeData();
+            }
 
             // DOM Elements
             const authForm = document.getElementById('auth-form');
@@ -87,6 +89,7 @@
             const termsField = document.getElementById('terms-field');
             const passwordInput = document.getElementById('password');
             const passwordStrength = document.getElementById('password-strength');
+            const authSubmitBtn = document.getElementById('auth-submit-btn');
 
             // Get mode from URL (login or register)
             const urlParams = new URLSearchParams(window.location.search);
@@ -109,10 +112,8 @@
                 }
             });
             
-            // Form submission
-            authForm?.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
+            // Form submission - Using button click instead of form submit
+            authSubmitBtn.addEventListener('click', function() {
                 if (mode === 'login') {
                     handleLogin();
                 } else {
@@ -127,6 +128,7 @@
                 if (mode === 'register') {
                     authTitle.textContent = 'Create Account';
                     authSubtitle.textContent = 'Join KOMII to track your complaints';
+                    authSubmitBtn.textContent = 'Create Account';
                     authSwitch.innerHTML = 'Already have an account? <a href="#" class="text-blue-600 hover:text-blue-500 font-medium">Sign in</a>';
                     nameFields?.classList.remove('hidden');
                     confirmPasswordField?.classList.remove('hidden');
@@ -134,6 +136,7 @@
                 } else {
                     authTitle.textContent = 'Welcome Back';
                     authSubtitle.textContent = 'Sign in to your KOMII account';
+                    authSubmitBtn.textContent = 'Sign In';
                     authSwitch.innerHTML = 'Don\'t have an account? <a href="#" class="text-blue-600 hover:text-blue-500 font-medium">Create one</a>';
                     nameFields?.classList.add('hidden');
                     confirmPasswordField?.classList.add('hidden');
@@ -155,27 +158,28 @@
                     return;
                 }
                 
-                const result = login(email, password);
+                const users = JSON.parse(localStorage.getItem('komiiUsers')) || [];
+                const user = users.find(u => u.email === email && u.password === password);
                 
-                if (result.success) {
-                    showAlert('Login successful! Redirecting...', 'success');
-                    
-                    // Redirect based on role
-                    setTimeout(() => {
-                        switch(result.user.role) {
-                            case 'admin':
-                                window.location.href = 'admin.html';
-                                break;
-                            case 'staff':
-                                window.location.href = 'dashboard.html';
-                                break;
-                            default:
-                                window.location.href = 'resident.html';
-                        }
-                    }, 1000);
-                } else {
-                    showAlert(result.message || 'Invalid email or password', 'error');
+                if (!user) {
+                    showAlert('Invalid credentials. Try these test accounts:\nAdmin: admin@komii.gov/admin123\nStaff: worker@komii.gov/worker123\nResident: resident@example.com/resident123', 'error');
+                    return;
                 }
+                
+                localStorage.setItem('komiiUser', JSON.stringify(user));
+                localStorage.setItem('komiiIsLoggedIn', 'true');
+                showAlert('Login successful! Redirecting...', 'success');
+                
+                // Redirect based on role
+                setTimeout(() => {
+                    if (user.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else if (user.role === 'staff') {
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        window.location.href = 'resident.html';
+                    }
+                }, 1000);
             }
 
             // Handle registration process
@@ -219,7 +223,7 @@
                     id: Date.now(),
                     name: `${firstName} ${lastName}`,
                     email,
-                    password, // Note: In production, hash this password
+                    password,
                     role: 'resident',
                     active: true,
                     createdAt: new Date().toISOString(),
