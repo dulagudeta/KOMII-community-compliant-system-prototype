@@ -33,11 +33,11 @@ No installation required - this is a client-side only prototype that runs in the
 ## File Structure
 /komii-prototype/
 
-├── index.html          # Landing page                                                                                                                               
-├── auth.html           # Login/registration
-├── complaint.html      # Complaint submission/tracking
-├── resident.html       # Resident dashboard
-├── dashboard.html      # Staff dashboard
+├── index.html          # Landing page                                                                                                                              
+├── auth.html           # Login/registration                                                                                                                        
+├── complaint.html      # Complaint submission/tracking                                                                                                             
+├── resident.html       # Resident dashboard                                                                                                                        
+├── dashboard.html      # Staff dashboard                                                                                                                           
 ├── admin.html          # Admin dashboard
 ├── styles.css          # Custom styles
 └── app.js              # Core application logic
