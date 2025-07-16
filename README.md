@@ -38,8 +38,8 @@ No installation required - this is a client-side only prototype that runs in the
 ├── complaint.html      # Complaint submission/tracking                                                                                                             
 ├── resident.html       # Resident dashboard                                                                                                                        
 ├── dashboard.html      # Staff dashboard                                                                                                                           
-├── admin.html          # Admin dashboard
-├── styles.css          # Custom styles
+├── admin.html          # Admin dashboard                                                                                                                           
+├── styles.css          # Custom styles                                                                                                                             
 └── app.js              # Core application logic
 
 
