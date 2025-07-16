@@ -23,7 +23,7 @@ No installation required - this is a client-side only prototype that runs in the
 - JavaScript (with localStorage for data persistence)
 
 ## How to Use
-1. Open `index.html` in any modern browser
+1. Open `index.html` 
 2. Click "Login" and use one of the test credentials above
 3. Based on your role:
    - **Residents**: Submit new complaints or track existing ones
